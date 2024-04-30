@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cajero</title>
+</head>
+<body>
+    <h1>Cajero</h1>
+    <form action="{{ url_for('menu_cajero') }}" method="POST">
+        <!-- Agrega aquí los campos de entrada que sean necesarios -->
+        <label for="transaccion">Transacción:</label>
+        <input type="text" id="transaccion" name="transaccion" required><br>
+
+        <label for="monto">Monto:</label>
+        <input type="number" id="monto" name="monto" required><br>
+
+        <button type="submit">Enviar</button>
+    </form>
+</body>
+</html>

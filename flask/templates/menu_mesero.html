@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menú Mesero</title>
+    <style>
+        .btn {
+            background-color: #007bff;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        .btn:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>Menú Mesero</h1>
+    
+    <form action="{{url_for('crear_orden')}}" method="POST">
+        <button type="submit" class="btn">Crear orden</button>
+    </form>
+
+    <form action="{{url_for('ver_ordenes')}}">
+        <button type="submit" class="btn">Ver Órdenes</button>
+    </form>
+    
+    <form action="{{url_for('gestionar_ordenes')}}">
+        <button type="submit" class="btn">Gestionar Órdenes</button>
+    </form>
+    
+    <a href="{{ url_for('logout') }}">Cerrar sesión</a>
+</body>
+</html>

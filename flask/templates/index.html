@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iniciar Sesión</title>
+</head>
+<body>
+    <h1>Iniciar Sesión</h1>
+    <form action="{{ url_for('login') }}" method="POST">
+        <label for="username">Nombre de Usuario:</label>
+        <input type="text" id="username" name="usuario" required><br><br>
+        <label for="password">Contraseña:</label>
+        <input type="password" id="password" name="password" required><br><br>
+        <button type="submit">Iniciar Sesión</button>
+    </form>
+    <a href="{{ url_for('registro') }}">Registrar Nuevo Usuario</a>
+
+    <!-- Agregar un enlace para cerrar sesión solo si el usuario ha iniciado sesión -->
+    {% if 'usuario' in session %}
+    <a href="{{ url_for('logout') }}">Cerrar sesión</a>
+    {% endif %}
+</body>
+</html>

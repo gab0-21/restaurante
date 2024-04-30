@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ver Órdenes</title>
+</head>
+<body>
+    <h1>Ver Órdenes</h1>
+    
+    <table border="1">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Mesa</th>
+                <th>Platillo</th>
+                <th>Cantidad</th>
+                <th>Precio</th> <!-- Nueva columna para el precio -->
+                <th>Nota Especial</th> <!-- Nueva columna para la nota especial -->
+            </tr>
+        </thead>
+        <tbody>
+            {% for orden in ordenes %}
+            <tr>
+                <td>{{ orden.id }}</td>
+                <td>{{ orden.mesa }}</td>
+                <td>{{ orden.platillo }}</td>
+                <td>{{ orden.cantidad }}</td>
+                <td>{{ orden.precio }}</td> <!-- Mostrar el precio -->
+                <td>{{ orden.nota_especial }}</td> <!-- Mostrar la nota especial -->
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ url_for('menu_mesero') }}">Volver al menú</a>
+</body>
+</html>
+

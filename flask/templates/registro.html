@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro de Usuario</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" integrity="sha384-xOolHFLEh07PJGoPkLv1IbcEPTNtaed2xpHsD9ESMhqIYd0nLMwNLD69Npy4HI+N" crossorigin="anonymous">
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-md navbar-light" style="background-color: #e3f2fd;">
+		<a class="navbar-brand" th:href="@{/}">
+			<h5>Restaurante</h5>
+		</a>
+	</nav>
+
+    <br><br>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-6 col-md-6 col-sm-6 container justify-content-center card">
+                <br>
+                <div th:if="${param.exito}">
+					<div class="alert alert-info">Se ha registrado exitosamente</div>
+				</div>
+
+                <h3 class="text-center">Regístrate</h3>
+                <form action="{{ url_for('registro') }}" method="POST">
+                    <div class="form-group">
+                        <label for="usuario">Nombre de usuario:</label>
+                        <input type="text" id="usuario" name="usuario" class="form-control" required><br>
+                    </div>
+                    
+                    <select id="puesto" name="puesto" class="form-control">
+                            <option selected for="puesto">Selecciona Puesto</option>
+                            <option value="mesero">Mesero</option>
+                            <option value="cajero">Cajero</option>
+                            <option value="administrador">Administrador</option>
+                    </select>
+                    <br>
+
+                    <div class="form-group">
+                        <label for="password">Contraseña:</label>
+                        <input type="password" id="password" name="password" class="form-control" required><br>
+                    </div>
+                    
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-success">Registrar</button>
+                    </div>
+                    
+                </form>
+            </div>    
+        </div>
+    </div>
+</body>
+</html>
+
