@@ -28,7 +28,8 @@
                 <td>{{ orden.precio }}</td>
                 <td>{{ orden.cantidad }}</td>
                 <td>
-                    <form action="{{ url_for('gestionar_ordenes') }}" method="POST">
+                    <form action="{{ url_for('gestionar_ordenes', mesa=mesa_seleccionada) }}" method="POST">
+                        <!-- Incluido el parámetro 'mesa' en la URL -->
                         <input type="hidden" name="order_id" value="{{ orden.id }}">
                         <input type="hidden" name="action" value="edit">
                         <select name="new_platillo" onchange="actualizarPrecio(this)">
@@ -44,7 +45,8 @@
                         <input type="text" name="new_mesa" placeholder="Nueva mesa">
                         <button type="submit">Editar</button>
                     </form>
-                    <form action="{{ url_for('gestionar_ordenes') }}" method="POST">
+                    <form action="{{ url_for('gestionar_ordenes', mesa=mesa_seleccionada) }}" method="POST">
+                        <!-- Incluido el parámetro 'mesa' en la URL -->
                         <input type="hidden" name="order_id" value="{{ orden.id }}">
                         <input type="hidden" name="action" value="delete">
                         <button type="submit">Eliminar</button>

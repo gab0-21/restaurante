@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seleccionar Mesa</title>
+</head>
+<body>
+    <h1>Seleccionar Mesa</h1>
+    
+    <form action="{{ url_for('ver_ordenes') }}" method="POST">
+        <label for="mesa">Seleccione una mesa:</label>
+        <select id="mesa" name="mesa" required>
+            <option value="1">Mesa 1</option>
+            <option value="2">Mesa 2</option>
+            <option value="3">Mesa 3</option>
+            <option value="4">Mesa 4</option>
+            <option value="5">Mesa 5</option>
+        </select><br><br>
+
+        <button type="submit">Ver Órdenes</button>
+    </form>
+</body>
+</html>

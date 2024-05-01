@@ -40,80 +40,114 @@ def login():
             return "Nombre de usuario o contraseña incorrectos. Intente nuevamente."
     return render_template('index.html')
 
-@app.route('/menu_mesero', methods=['GET', 'POST'])
-def menu_mesero():
-    return render_template('menu_mesero.html')
-
-@app.route('/crear_orden', methods=['POST'])  # Solo permitir métodos POST
-def crear_orden():    
+@app.route('/seleccionar_mesa', methods=['GET', 'POST'])
+def seleccionar_mesa():
     if request.method == 'POST':
-        mesa = request.form.get('mesa')
+        mesa_seleccionada = request.form['mesa']
+        session['mesa_seleccionada'] = mesa_seleccionada
+        if request.referrer and 'gestionar_ordenes' in request.referrer:  # Si la página anterior fue gestionar_ordenes, redirige allí
+            return redirect(url_for('gestionar_ordenes'))
+        else:  # De lo contrario, redirige a crear_orden
+            return redirect(url_for('crear_orden'))
+    return render_template('seleccionar_mesa.html')
+
+
+@app.route('/crear_orden', methods=['GET', 'POST'])
+def crear_orden():
+    mesa_seleccionada = session.get('mesa_seleccionada')
+    if mesa_seleccionada is None:
+        return redirect(url_for('seleccionar_mesa'))
+
+    if request.method == 'POST':
+        mesa = mesa_seleccionada
         platillo = request.form.get('platillo')
         cantidad = request.form.get('cantidad')
-        nota_especial = request.form.get('nota_especial')  # Obtener la nota especial del formulario
-        
-        precio = request.form.get('precio')  # Obtener el precio del formulario
-        
-        # Insertar la orden en la base de datos, incluyendo el precio
+        nota_especial = request.form.get('nota_especial')
+        precio = request.form.get('precio')
+
+        # Construir el nombre de la tabla de la orden
+        tabla_orden = f"orden_mesa_{mesa}"
+
         cur = mysql.connection.cursor()
-        cur.execute("INSERT INTO orden (mesa, platillo, cantidad, nota_especial, precio) VALUES (%s, %s, %s, %s, %s)",
+        cur.execute(f"INSERT INTO {tabla_orden} (mesa, platillo, cantidad, nota_especial, precio) VALUES (%s, %s, %s, %s, %s)",
                     (mesa, platillo, cantidad, nota_especial, precio))
         mysql.connection.commit()
         cur.close()
-        
-        return render_template('crear_orden.html')  # Redirige de vuelta al menú del mesero
-    else:
-        return redirect(url_for('menu_mesero'))  # Redirige de vuelta al menú del mesero si no se envía el formulario
 
-@app.route('/ver_ordenes')
+        # Después de crear la orden, redirige al usuario a seleccionar la mesa nuevamente
+        return redirect(url_for('seleccionar_mesa'))
+    
+    return render_template('crear_orden.html', mesa_seleccionada=mesa_seleccionada)
+
+
+@app.route('/ver_ordenes', methods=['GET', 'POST'])
 def ver_ordenes():
-    cur = mysql.connection.cursor()
-    cur.execute("SELECT * FROM orden")
-    ordenes = cur.fetchall()
-    cur.close()
-    return render_template('ver_ordenes.html', ordenes=ordenes)   
+    if request.method == 'POST':
+        mesa_seleccionada = request.form['mesa']
+        cur = mysql.connection.cursor()
+        tabla_orden = f"orden_mesa_{mesa_seleccionada}"
+        cur.execute(f"SELECT * FROM {tabla_orden}")
+        ordenes = cur.fetchall()
+        cur.close()
+        return render_template('ver_ordenes.html', ordenes=ordenes, mesa_seleccionada=mesa_seleccionada)
+    return render_template('seleccionar_mesa_ver_ordenes.html')
 
 @app.route('/gestionar_ordenes', methods=['GET', 'POST'])
 def gestionar_ordenes():
-    if request.method == 'GET':
-        # Obtener todas las órdenes de la base de datos
-        cur = mysql.connection.cursor()
-        cur.execute("SELECT * FROM orden")
-        ordenes = cur.fetchall()
-        cur.close()
-        return render_template('gestionar_ordenes.html', ordenes=ordenes)
-    elif request.method == 'POST':
-        action = request.form.get('action')
-        if action == 'delete':
-            order_id = request.form.get('order_id')
+    mesa_seleccionada = session.get('mesa_seleccionada')
+    if mesa_seleccionada:
+        if request.method == 'GET':
+            # Obtener las órdenes específicas para la mesa seleccionada
             cur = mysql.connection.cursor()
-            cur.execute("DELETE FROM orden WHERE id = %s", (order_id,))
-            mysql.connection.commit()
+            tabla_orden = f"orden_mesa_{mesa_seleccionada}"
+            cur.execute(f"SELECT * FROM {tabla_orden}")
+            ordenes = cur.fetchall()
             cur.close()
-            return redirect(url_for('gestionar_ordenes'))
-        elif action == 'edit':
-            order_id = request.form.get('order_id')
-            new_platillo = request.form.get('new_platillo')
-            new_cantidad = request.form.get('new_cantidad')
-            new_mesa = request.form.get('new_mesa')
-            cur = mysql.connection.cursor()
-            if new_platillo:
-                # Obtener el nuevo precio del platillo desde la base de datos
-                cur.execute("SELECT precio FROM orden WHERE platillo = %s", (new_platillo,))
-                new_precio_data = cur.fetchone()
-                if new_precio_data:
-                    new_precio = new_precio_data['precio']
-                    cur.execute("UPDATE orden SET platillo = %s, cantidad = %s, mesa = %s, precio = %s WHERE id = %s", (new_platillo, new_cantidad, new_mesa, new_precio, order_id))
-                    mysql.connection.commit()
-                    cur.close()
-                    return redirect(url_for('gestionar_ordenes'))
-                else:
-                    # Manejar el caso donde no se encuentre el nuevo precio
-                    cur.close()
-                    return "El nuevo platillo seleccionado no tiene precio en la base de datos."
-            else:
-                # No se proporcionó un nuevo platillo
+            return render_template('gestionar_ordenes.html', ordenes=ordenes, mesa_seleccionada=mesa_seleccionada)
+        elif request.method == 'POST':
+            action = request.form.get('action')
+            if action == 'delete':
+                order_id = request.form.get('order_id')
+                cur = mysql.connection.cursor()
+                tabla_orden = f"orden_mesa_{mesa_seleccionada}"
+                cur.execute(f"DELETE FROM {tabla_orden} WHERE id = %s", (order_id,))
+                mysql.connection.commit()
+                cur.close()
                 return redirect(url_for('gestionar_ordenes'))
+            elif action == 'edit':
+                order_id = request.form.get('order_id')
+                new_platillo = request.form.get('new_platillo')
+                new_cantidad = request.form.get('new_cantidad')
+                new_mesa = request.form.get('new_mesa')
+                cur = mysql.connection.cursor()
+                if new_platillo:
+                    # Obtener el nuevo precio del platillo desde la base de datos
+                    cur.execute("SELECT precio FROM orden WHERE platillo = %s", (new_platillo,))
+                    new_precio_data = cur.fetchone()
+                    if new_precio_data:
+                        new_precio = new_precio_data['precio']
+                        tabla_orden = f"orden_mesa_{mesa_seleccionada}"
+                        cur.execute(f"UPDATE {tabla_orden} SET platillo = %s, cantidad = %s, mesa = %s, precio = %s WHERE id = %s", (new_platillo, new_cantidad, new_mesa, new_precio, order_id))
+                        mysql.connection.commit()
+                        cur.close()
+                        return redirect(url_for('gestionar_ordenes'))
+                    else:
+                        # Manejar el caso donde no se encuentre el nuevo precio
+                        cur.close()
+                        return "El nuevo platillo seleccionado no tiene precio en la base de datos."
+                else:
+                    # No se proporcionó un nuevo platillo
+                    return redirect(url_for('gestionar_ordenes'))
+    else:
+        return redirect(url_for('seleccionar_mesa'))  # Corrección aquí
+
+    # Si no se cumple ninguna condición, se renderiza la plantilla de selección de mesa
+    return render_template('seleccionar_mesa.html')  # Renderizar la plantilla de selección de mesa
+
+
+@app.route('/menu_mesero')
+def menu_mesero():
+    return render_template('menu_mesero.html')
 
     
 @app.route('/menu/cajero')

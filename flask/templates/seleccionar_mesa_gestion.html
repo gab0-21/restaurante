@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seleccionar Mesa</title>
+</head>
+<body>
+    <h1>Seleccionar Mesa para Gestionar Órdenes</h1>
+    
+    <form action="{{ url_for('seleccionar_mesa_gestion') }}" method="POST">
+        <label for="mesa">Selecciona una mesa:</label>
+        <select name="mesa" id="mesa">
+            <option value="1">Mesa 1</option>
+            <option value="2">Mesa 2</option>
+            <!-- Asegúrate de incluir opciones para todas las mesas disponibles -->
+        </select>
+        <button type="submit">Seleccionar</button>
+    </form>
+
+</body>
+</html>

@@ -30,7 +30,8 @@
         <button type="submit" class="btn">Ver Órdenes</button>
     </form>
     
-    <form action="{{url_for('gestionar_ordenes')}}">
+    <form action="{{ url_for('gestionar_ordenes') }}" method="POST">
+        <!-- Elimina la parte donde se selecciona una mesa -->
         <button type="submit" class="btn">Gestionar Órdenes</button>
     </form>
     
