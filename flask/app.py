@@ -51,7 +51,6 @@ def seleccionar_mesa():
             return redirect(url_for('crear_orden'))
     return render_template('seleccionar_mesa.html')
 
-
 @app.route('/crear_orden', methods=['GET', 'POST'])
 def crear_orden():
     mesa_seleccionada = session.get('mesa_seleccionada')
@@ -60,17 +59,34 @@ def crear_orden():
 
     if request.method == 'POST':
         mesa = mesa_seleccionada
-        platillo = request.form.get('platillo')
+        platillos = request.form.getlist('platillos[]')  # Obtener una lista de platillos seleccionados
         cantidad = request.form.get('cantidad')
         nota_especial = request.form.get('nota_especial')
-        precio = request.form.get('precio')
+
+        # Verificar si todos los platillos seleccionados tienen precios en la base de datos
+        cur = mysql.connection.cursor()
+        for platillo in platillos:
+            cur.execute("SELECT precio FROM platillos WHERE nombre_platillo = %s", (platillo,))
+            precio_data = cur.fetchone()
+            if precio_data is None or 'precio' not in precio_data:
+                cur.close()
+                return "Error: Algunos platillos seleccionados no tienen precio en la base de datos."
+        cur.close()
 
         # Construir el nombre de la tabla de la orden
         tabla_orden = f"orden_mesa_{mesa}"
 
+        # Insertar un registro en la base de datos para cada platillo seleccionado
         cur = mysql.connection.cursor()
-        cur.execute(f"INSERT INTO {tabla_orden} (mesa, platillo, cantidad, nota_especial, precio) VALUES (%s, %s, %s, %s, %s)",
-                    (mesa, platillo, cantidad, nota_especial, precio))
+        for platillo in platillos:
+            # Obtener el precio del platillo desde la base de datos
+            cur.execute("SELECT precio FROM platillos WHERE nombre_platillo = %s", (platillo,))
+            precio_data = cur.fetchone()
+            if precio_data is not None and 'precio' in precio_data:
+                precio = precio_data['precio']  # Obtener el precio del platillo del diccionario
+                # Insertar el registro en la tabla de órdenes con el precio individual del platillo
+                cur.execute(f"INSERT INTO {tabla_orden} (mesa, platillo, cantidad, nota_especial, precio) VALUES (%s, %s, %s, %s, %s)",
+                            (mesa, platillo, cantidad, nota_especial, precio))
         mysql.connection.commit()
         cur.close()
 
