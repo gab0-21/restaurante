@@ -57,6 +57,10 @@
         </tbody>
     </table>
     
+    <form action="{{ url_for('cerrar_cuenta', mesa=mesa_seleccionada) }}" method="POST">
+        <button type="submit">Cerrar cuenta</button>
+    </form>
+
     <a href="{{ url_for('menu_mesero') }}">Volver al menú del mesero</a>
 
     <script>

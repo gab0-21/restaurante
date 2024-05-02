@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, session
 from flask_mysqldb import MySQL
 from datetime import datetime
-
+import qrcode 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'  # Clave secreta para la sesión
 
@@ -161,14 +161,63 @@ def gestionar_ordenes():
     return render_template('seleccionar_mesa.html')  # Renderizar la plantilla de selección de mesa
 
 
+@app.route('/cerrar_cuenta/<int:mesa>', methods=['POST'])
+def cerrar_cuenta(mesa):
+    # Obtener los datos de la tabla de órdenes para la mesa específica
+    cur = mysql.connection.cursor()
+    tabla_orden = f"orden_mesa_{mesa}"
+    cur.execute(f"SELECT * FROM {tabla_orden}")
+    ordenes = cur.fetchall()
+
+    # Insertar los datos en la tabla caja1 y obtener el total de la cuenta
+    total_cuenta = 0
+    fecha_cierre = datetime.now()
+    for orden in ordenes:
+        cur.execute("INSERT INTO caja1 (mesa, platillo, cantidad, nota_especial, precio, fecha_cierre) VALUES (%s, %s, %s, %s, %s, %s)",
+                    (orden['mesa'], orden['platillo'], orden['cantidad'], orden['nota_especial'], orden['precio'], fecha_cierre))
+        total_cuenta += orden['precio']
+    mysql.connection.commit()
+
+    # Eliminar los datos de la tabla de órdenes para la mesa específica
+    cur.execute(f"DELETE FROM {tabla_orden}")
+    mysql.connection.commit()
+
+    cur.close()
+
+    return redirect(url_for('menu_mesero'))  # Redirigir al menú del mesero después de cerrar la cuenta
+
 @app.route('/menu_mesero')
 def menu_mesero():
     return render_template('menu_mesero.html')
 
-    
-@app.route('/menu/cajero')
+@app.route('/menu_cajero')
 def menu_cajero():
     return render_template('menu_cajero.html')
+
+
+@app.route('/cobrar_cuentas', methods=['GET', 'POST'])
+def cobrar_cuentas():
+    if request.method == 'POST':
+        if 'cuenta_id' in request.form:
+            cuenta_id = request.form['cuenta_id']
+            metodo_pago = request.form.get(f'metodo_pago_{cuenta_id}')
+            if metodo_pago == 'efectivo':
+                # Realizar el cobro en efectivo
+                mensaje = f"Se cobró el total de la cuenta de la mesa {cuenta_id} en efectivo."
+                return mensaje
+            elif metodo_pago == 'digital':
+                # Realizar el cobro digital
+                mensaje = f"Se cobró el total de la cuenta de la mesa {cuenta_id} de forma digital."
+                return mensaje
+
+    # Obtener los datos de la tabla caja1
+    cur = mysql.connection.cursor()
+    cur.execute("SELECT mesa, SUM(precio) AS total FROM caja1 GROUP BY mesa")
+    cuentas = cur.fetchall()
+    cur.close()
+
+    return render_template('cobrar_cuentas.html', cuentas=cuentas)
+
 
 @app.route('/menu/admin')
 def menu_admin():

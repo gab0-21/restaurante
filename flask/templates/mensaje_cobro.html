@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirmación de Cobros</title>
+</head>
+<body>
+    <h1>Confirmación de Cobros</h1>
+    <ul>
+        {% for mensaje in mensajes %}
+        <li>{{ mensaje }}</li>
+        {% endfor %}
+    </ul>
+    <a href="{{ url_for('menu_cajero') }}">Volver al Menú del Cajero</a>
+</body>
+</html>

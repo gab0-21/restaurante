@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cobrar Cuentas</title>
+</head>
+<body>
+    <h1>Cobrar Cuentas</h1>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Mesa</th>
+                <th>Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for cuenta in cuentas %}
+            <tr>
+                <td>{{ cuenta.mesa }}</td>
+                <td>{{ cuenta.total }}</td>
+                <td>
+                    <form action="{{ url_for('cobrar_cuentas') }}" method="POST">
+                        <input type="hidden" name="cuenta_id" value="{{ cuenta.mesa }}">
+                        <input type="radio" id="efectivo_{{ cuenta.mesa }}" name="metodo_pago_{{ cuenta.mesa }}" value="efectivo">
+                        <label for="efectivo_{{ cuenta.mesa }}">Efectivo</label><br>
+                        <input type="radio" id="digital_{{ cuenta.mesa }}" name="metodo_pago_{{ cuenta.mesa }}" value="digital">
+                        <label for="digital_{{ cuenta.mesa }}">Digital</label><br>
+                        <button type="submit">Cobrar</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>
+
